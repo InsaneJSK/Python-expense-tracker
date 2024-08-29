@@ -2,52 +2,66 @@
 made solely in python
 Made by Jaspreet Singh"""
 
-import csv, os, datetime
+import csv
+import os
+import datetime
+from tabulate import tabulate
 
-with open("program-files/Users.csv", 'r', newline='') as f:
-    reader = csv.reader(f)
-    Users = [i for i in reader]
+user = ''
+headers = ["Amount", "Paid to", "Date and Time"]
 
-with open("program-files/Passwords.csv", 'r', newline='') as f:
-    reader = csv.reader(f)
-    Passwords = [i for i in reader]
+with open("program-files/Users.csv", 'r', newline='', encoding='utf-8') as usernames:
+    reader = csv.reader(usernames)
+    Users = []
+    for i in reader:
+        Users.append(i)
+
+with open("program-files/Passwords.csv", 'r', newline='', encoding='utf-8') as passes:
+    reader = csv.reader(passes)
+    Passwords = []
+    for i in reader:
+        Passwords.append(i)
 
 def main_flow():
+    """This function directs the main flow of the code, the user login system"""
     global user
     print("Welcome to personal expense tracker")
     val = input("Username: ")
     user = val
-    if Users == []:
-        with open("program-files/Users.csv", "a", newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([val])
-                new_user(val)
+    if not Users:
+        with open("program-files/Users.csv", "a", newline='', encoding='utf-8') as usernames:
+            writer = csv.writer(usernames)
+            writer.writerow([val])
+            new_user(val)
     else:
-        for i in Users:
-            if val in i:
+        for value in Users:
+            if val in value:
                 old_user(val)
                 break
         else:
-            with open("program-files/Users.csv", "a", newline='') as f:
-                writer = csv.writer(f)
+            with open("program-files/Users.csv", "a", newline='', encoding='utf-8') as usernames:
+                writer = csv.writer(usernames)
                 writer.writerow([val])
                 new_user(val)
 
 def new_user(val):
+    """This function would make sure a new user sets his password and then goes to the menu"""
     print("New user detected, please set your password!")
     var = input("Enter the value: ")
-    with open("program-files/Passwords.csv", "a", newline="") as f:
-        writer = csv.writer(f)
+    with open("program-files/Passwords.csv", "a", newline="", encoding='utf-8') as passes:
+        writer = csv.writer(passes)
         writer.writerow([val, var])
     menu()
 
 def old_user(val):
+    """This function would make sure the old user is verified with password"""
     print(f"Welcome back, {val}")
     var = input("Please enter your password: ")
     check_password(val, var)
     menu()
 
 def check_password(val, var):
+    """This function checks the password"""
     for i in Passwords:
         if i[0] == val:
             passwd = i[1]
@@ -65,7 +79,8 @@ def check_password(val, var):
         quit()
 
 def menu():
-    while True:    
+    """The main meny of the program is defined here"""
+    while True:
         os.system("cls")
         print("Enter the number corresponding to the task")
         print("1 Add Expense")
@@ -102,20 +117,22 @@ def menu():
                 print("Try again!")
 
 def add_exp():
+    """This function will add new expenditures to the database"""
     os.system("cls")
     paid = int(input("Amount paid: "))
     paidto = input("Amount paid to: ")
     time = datetime.datetime.now()
     try:
-        with open(f"program-files/expenses/{user}.csv", 'a', newline='') as f:
-            writer = csv.writer(f)
+        with open(f"program-files/expenses/{user}.csv", 'a', newline='', encoding='utf-8') as data:
+            writer = csv.writer(data)
             writer.writerow([paid, paidto, time])
     except FileNotFoundError:
-        with open(f"program-files/expenses/{user}.csv", 'w', newline='') as f:
-            writer = csv.writer(f)
+        with open(f"program-files/expenses/{user}.csv", 'w', newline='', encoding='utf-8') as data:
+            writer = csv.writer(data)
             writer.writerow([paid, paidto, time])
 
 def view_exp():
+    """This function would display the saved expenditures"""
     os.system("cls")
     print("Enter the number corresponding to the task")
     print("1 All transactions")
@@ -148,14 +165,15 @@ def view_exp():
             print("Try again!")
 
 def stats():
+    """This function is used to display the statistics of the selected user"""
     print(f"Stats page for {user}")
     now = datetime.datetime.now()
     month = now.month
     exp = 0
     dicti = {}
     try:
-        with open(f"program-files\\expenses\\{user}.csv", "r", newline='') as f:
-            reader = csv.reader(f)
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline='', encoding='utf-8') as dat:
+            reader = csv.reader(dat)
             for i in reader:
                 if int(i[2][5:7]) == month:
                     exp += int(i[0])
@@ -165,7 +183,8 @@ def stats():
                         dicti[i[1]] += int(i[0])
     except FileNotFoundError:
         pass
-    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    months = ["January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"]
     print(f"Total Expenditure in the month of {months[month-1]} is {exp}")
     max_key = max(dicti, key=dicti.get)
     print(f"The most expenditure was done on {max_key} which was {dicti[max_key]}")
@@ -173,42 +192,48 @@ def stats():
     print(f"Average Daily expenditure = {avg}")
 
 def del_user():
+    """This function will be used in deleting the userdata"""
     print("Are you sure?")
     yn = input("Enter y to proceed, anything else to cancel")
     if yn != "y":
         menu()
-    with open("program-files\\Users.csv", "r", newline='') as f:
-        reader = csv.reader(f)
+    with open("program-files\\Users.csv", "r", newline='', encoding='utf-8') as usernames:
+        reader = csv.reader(usernames)
         listi = []
         for i in reader:
             listi.append(i)
     print(listi)
     index = listi.index([user])
     listi.pop(index)
-    with open("program-files\\Users.csv", "w", newline="") as f:
-        writer = csv.writer(f)
+    with open("program-files\\Users.csv", "w", newline="", encoding='utf-8') as usernames:
+        writer = csv.writer(usernames)
         writer.writerows(listi)
-    with open("program-files\\Passwords.csv", "r", newline="") as f:
-        reader = csv.reader(f)
+    with open("program-files\\Passwords.csv", "r", newline="", encoding='utf-8') as passes:
+        reader = csv.reader(passes)
         listii = []
         for i in reader:
             listii.append(i)
     listii.pop(index)
-    with open("program-files\\Passwords.csv", "w", newline="") as f:
-        writer = csv.writer(f)
+    with open("program-files\\Passwords.csv", "w", newline="", encoding='utf-8') as passes:
+        writer = csv.writer(passes)
         writer.writerows(listi)
     print(f"{user} deleted successfully")
 
 def view_all():
+    """This function will display all transactions"""
     try:
-        with open(f"program-files\\expenses\\{user}.csv", "r", newline='') as f:
-            reader = csv.reader(f)
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline='', encoding='utf-8') as dat:
+            reader = csv.reader(dat)
+            listi = []
             for i in reader:
-                print(i)
+                listi.append(i)
+        table = tabulate(listi, headers, tablefmt="grid")
+        print(table)
     except FileNotFoundError:
         print("No expenses tracked for the current user!")
 
 def view_date():
+    """This function will display transactions based on date"""
     while True:
         date = input("Enter the date like YYYY-MM-DD: ")
         if len(date) != 10:
@@ -226,19 +251,23 @@ def view_date():
         else:
             break
     try:
-        with open(f"program-files\\expenses\\{user}.csv", "r", newline="") as f:
-            reader = csv.reader(f)
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline="", encoding='utf-8') as dat:
+            reader = csv.reader(dat)
             boo = False
+            listi = []
             for i in reader:
                 if date == i[2][:10]:
-                    print(i)
+                    listi.append(i)
                     boo = True
             if not boo:
                 print("No records found")
+        table = tabulate(listi, headers, tablefmt="grid")
+        print(table)
     except FileNotFoundError:
         print("No expenses tracked for the current user!")
-        
+
 def view_amount():
+    """This function will display transactions based on amount paid"""
     while True:
         try:
             amount = int(input("Enter the amount: "))
@@ -246,30 +275,37 @@ def view_amount():
         except ValueError:
             print("Try again!")
     try:
-        with open(f"program-files\\expenses\\{user}.csv", "r", newline="") as f:
-            reader = csv.reader(f)
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline="", encoding='utf-8') as dat:
+            reader = csv.reader(dat)
             boo = False
+            listi = []
             for i in reader:
                 if amount == int(i[0]):
-                    print(i)
+                    listi.append(i)
                     boo = True
             if not boo:
                 print("No records found")
     except FileNotFoundError:
         print("No expenses tracked for the current user!")
+    table = tabulate(listi, headers, tablefmt="grid")
+    print(table)
 
 def view_person():
+    """This function will display transactions based on the person the amount was paid to"""
     person = input("Enter the name of the person the amount was paid to: ")
     try:
-        with open(f"program-files\\expenses\\{user}.csv", "r", newline="") as f:
-            reader = csv.reader(f)
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline="", encoding='utf-8') as dat:
+            reader = csv.reader(dat)
             boo = False
+            listi = []
             for i in reader:
                 if person == int(i[1]):
-                    print(i)
+                    listi.append(i)
                     boo = True
             if not boo:
                 print("No records found")
+        table = tabulate(listi, headers, tablefmt="grid")
+        print(table)
     except FileNotFoundError:
         print("No expenses tracked for the current user!")
 
