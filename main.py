@@ -147,12 +147,57 @@ def view_exp():
         else:
             print("Try again!")
 
-
 def stats():
-    pass
+    print(f"Stats page for {user}")
+    now = datetime.datetime.now()
+    month = now.month
+    exp = 0
+    dicti = {}
+    try:
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline='') as f:
+            reader = csv.reader(f)
+            for i in reader:
+                if int(i[2][5:7]) == month:
+                    exp += int(i[0])
+                    if i[1] not in dicti.keys():
+                        dicti[i[1]] = int(i[0])
+                    else:
+                        dicti[i[1]] += int(i[0])
+    except FileNotFoundError:
+        pass
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    print(f"Total Expenditure in the month of {months[month-1]} is {exp}")
+    max_key = max(dicti, key=dicti.get)
+    print(f"The most expenditure was done on {max_key} which was {dicti[max_key]}")
+    avg = exp/30
+    print(f"Average Daily expenditure = {avg}")
 
 def del_user():
-    pass
+    print("Are you sure?")
+    yn = input("Enter y to proceed, anything else to cancel")
+    if yn != "y":
+        menu()
+    with open("program-files\\Users.csv", "r", newline='') as f:
+        reader = csv.reader(f)
+        listi = []
+        for i in reader:
+            listi.append(i)
+    print(listi)
+    index = listi.index([user])
+    listi.pop(index)
+    with open("program-files\\Users.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(listi)
+    with open("program-files\\Passwords.csv", "r", newline="") as f:
+        reader = csv.reader(f)
+        listii = []
+        for i in reader:
+            listii.append(i)
+    listii.pop(index)
+    with open("program-files\\Passwords.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(listi)
+    print(f"{user} deleted successfully")
 
 def view_all():
     try:
@@ -214,7 +259,19 @@ def view_amount():
         print("No expenses tracked for the current user!")
 
 def view_person():
-    pass
+    person = input("Enter the name of the person the amount was paid to: ")
+    try:
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline="") as f:
+            reader = csv.reader(f)
+            boo = False
+            for i in reader:
+                if person == int(i[1]):
+                    print(i)
+                    boo = True
+            if not boo:
+                print("No records found")
+    except FileNotFoundError:
+        print("No expenses tracked for the current user!")
 
 #Main loop
 main_flow()
