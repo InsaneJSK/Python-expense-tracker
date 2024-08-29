@@ -13,8 +13,10 @@ with open("program-files/Passwords.csv", 'r', newline='') as f:
     Passwords = [i for i in reader]
 
 def main_flow():
+    global user
     print("Welcome to personal expense tracker")
     val = input("Username: ")
+    user = val
     if Users == []:
         with open("program-files/Users.csv", "a", newline='') as f:
                 writer = csv.writer(f)
@@ -70,35 +72,148 @@ def menu():
         print("2 View Expenses")
         print("3 Statistics")
         print("4 Delete user data")
+        print("5 quit")
         while True:
-            var = input("Enter the value: ")
+            try:
+                var = int(input("Enter the value: "))
+            except ValueError:
+                continue
             if var == 1:
                 add_exp()
+                input("Press enter to continue")
                 break
             elif var == 2:
                 view_exp()
+                input("Press enter to continue")
                 break
             elif var == 3:
                 stats()
+                input("Press enter to continue")
                 break
             elif var == 4:
                 del_user()
+                input("Press enter to continue")
                 break
             elif var == 5:
+                os.system('cls')
+                print("Quitting the application")
                 quit()
             else:
                 print("Try again!")
 
 def add_exp():
-    pass
+    os.system("cls")
+    paid = int(input("Amount paid: "))
+    paidto = input("Amount paid to: ")
+    time = datetime.datetime.now()
+    try:
+        with open(f"program-files/expenses/{user}.csv", 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([paid, paidto, time])
+    except FileNotFoundError:
+        with open(f"program-files/expenses/{user}.csv", 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([paid, paidto, time])
 
 def view_exp():
-    pass
+    os.system("cls")
+    print("Enter the number corresponding to the task")
+    print("1 All transactions")
+    print("2 Transactions by date")
+    print("3 Transactions by amount")
+    print("4 Transactions by the person paid to")
+    print("5 Go back")
+    print("6 quit")
+    while True:
+        var = int(input("Enter the value: "))
+        if var == 1:
+            view_all()
+            break
+        elif var == 2:
+            view_date()
+            break
+        elif var == 3:
+            view_amount()
+            break
+        elif var == 4:
+            view_person()
+            break
+        elif var == 5:
+            menu()
+        elif var == 6:
+            os.system('cls')
+            print("Quitting the application")
+            quit()
+        else:
+            print("Try again!")
+
 
 def stats():
     pass
 
 def del_user():
+    pass
+
+def view_all():
+    try:
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline='') as f:
+            reader = csv.reader(f)
+            for i in reader:
+                print(i)
+    except FileNotFoundError:
+        print("No expenses tracked for the current user!")
+
+def view_date():
+    while True:
+        date = input("Enter the date like YYYY-MM-DD: ")
+        if len(date) != 10:
+            print("invalid")
+            continue
+        elif (date[4], date[7]) != ("-", "-"):
+            print("invalid")
+            continue
+        elif int(date[5:7]) not in list(range(1, 13)):
+            print("invalid")
+            continue
+        elif int(date[8:]) not in list(range(1, 32)):
+            print("invalid")
+            continue
+        else:
+            break
+    try:
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline="") as f:
+            reader = csv.reader(f)
+            boo = False
+            for i in reader:
+                if date == i[2][:10]:
+                    print(i)
+                    boo = True
+            if not boo:
+                print("No records found")
+    except FileNotFoundError:
+        print("No expenses tracked for the current user!")
+        
+def view_amount():
+    while True:
+        try:
+            amount = int(input("Enter the amount: "))
+            break
+        except ValueError:
+            print("Try again!")
+    try:
+        with open(f"program-files\\expenses\\{user}.csv", "r", newline="") as f:
+            reader = csv.reader(f)
+            boo = False
+            for i in reader:
+                if amount == int(i[0]):
+                    print(i)
+                    boo = True
+            if not boo:
+                print("No records found")
+    except FileNotFoundError:
+        print("No expenses tracked for the current user!")
+
+def view_person():
     pass
 
 #Main loop
